@@ -2,72 +2,85 @@ import com.sun.istack.internal.NotNull;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import javax.crypto.*;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Security;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
 
 
 public class EmpaquetarExamen {
-    public static void main(@NotNull String args[]) {
-//        Loading security provider ("BC")
-        Security.addProvider(new BouncyCastleProvider());
-//
+    public static void main(@NotNull String args[]) throws Exception {
+
+        Paquete pack = new Paquete();
+
         if (args.length != 4) {
             showTemplateArgs();
             System.exit(1);
         }
-//      Generating secret key for DES algorithm. Needed to cipher the Student's exam file
-        KeyGenerator DESGenerator = null;
-        try {
-            DESGenerator = KeyGenerator.getInstance("DES", "BC");
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println(e.getStackTrace());
-        } catch (NoSuchProviderException e) {
-            System.out.println(e.getStackTrace());
-        }
+//        Loading security provider ("BC")
+        Security.addProvider(new BouncyCastleProvider());
+
+//     Generating secret key for DES algorithm. Needed to cipher the Student's exam file
+        KeyGenerator DESGenerator = KeyGenerator.getInstance("DES", "BC");
         DESGenerator.init(56);
-        SecretKey key = DESGenerator.generateKey();
+        SecretKey keyDES = DESGenerator.generateKey();
 
 //      Creating cipher.
-        Cipher cipher = null;
-        try {
-            cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
-        } catch (NoSuchAlgorithmException e) {
-            System.out.println(e.getStackTrace());
-        } catch (NoSuchPaddingException e) {
-            System.out.println(e.getStackTrace());
-        }
+        Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+
 
 // Init cipher to cipher mode
-        try {
-            cipher.init(Cipher.ENCRYPT_MODE,key);
-        } catch (InvalidKeyException e) {
-            System.out.println(e.getStackTrace());
-        }
+
+        cipher.init(Cipher.ENCRYPT_MODE, keyDES);
+
 
 // Reading Student's exam file
-        byte[] buffer = null;
-        try {
-             buffer = Files.readAllBytes(Paths.get(args[0]));
-        } catch (IOException e) {
-            System.out.println(e.getStackTrace());
-        }
+        byte[] buffer = Files.readAllBytes(Paths.get(args[0]));
 
-        try {
-            cipher.doFinal(buffer); //Cipher exam.
-        } catch (IllegalBlockSizeException e) {
-            System.out.println(e.getStackTrace());
-        } catch (BadPaddingException e) {
-            System.out.println(e.getStackTrace());
-        }
+//Cipher exam.
+        cipher.doFinal(buffer);
 
+        pack.anadirBloque("CipherExam", cipher.toString().getBytes(Charset.forName("UTF-8")));
+
+//Cipher secret key with RSA
+        KeyFactory keyFactoryRSA = KeyFactory.getInstance("RSA", "BC");
+//Getting Student's private key
+        File privateKeyFile = new File(args[2] );
+        int privateKeyFileLength = (int) privateKeyFile.length();
+        byte[] bufferPrivate = new byte[privateKeyFileLength];
+        FileInputStream in = new FileInputStream(privateKeyFile);
+        in.read(bufferPrivate, 0, privateKeyFileLength);
+        in.close();
+
+        PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(bufferPrivate);
+        PrivateKey privateKey = keyFactoryRSA.generatePrivate(privateKeySpec);
+
+        //Getting Teacher's public key
+        File publicKeyFile = new File(args[3] );
+        int publicKeyFileLength = (int) publicKeyFile.length();
+        byte[] bufferPublic = new byte[privateKeyFileLength];
+        in = new FileInputStream(privateKeyFile);
+        in.read(bufferPublic, 0, publicKeyFileLength);
+        in.close();
+
+        PKCS8EncodedKeySpec publicKeySpec = new PKCS8EncodedKeySpec(bufferPrivate);
+        PrivateKey publicKey = keyFactoryRSA.generatePrivate(publicKeySpec);
+
+        Cipher cipherRSA = Cipher.getInstance("RSA", "BC");
+        cipherRSA.init(Cipher.ENCRYPT_MODE, publicKey);
+
+        byte[] cipheredDESKey = cipherRSA.doFinal(keyDES.getEncoded());
+
+        pack.anadirBloque("CipherKey", cipheredDESKey);
+        String packName = args[1].toString();
+        packName += ".paquete";
+        PaqueteDAO.escribirPaquete(packName, pack);
 
     }
-        private static void showTemplateArgs() {
+
+    private static void showTemplateArgs() {
         System.out.println("EmpaquetarExamen");
         System.out.println("\tArgs Syntax: ExamFile PackageName Student.private Teacher.public ");
         System.out.println();
