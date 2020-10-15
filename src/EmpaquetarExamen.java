@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 
 
 public class EmpaquetarExamen {
@@ -40,9 +41,9 @@ public class EmpaquetarExamen {
         byte[] buffer = Files.readAllBytes(Paths.get(args[0]));
 
 //Cipher exam.
-        cipher.doFinal(buffer);
+        String cipheredBufferDES = cipher.doFinal(buffer).toString();
 
-        pack.anadirBloque("CipherExam", cipher.toString().getBytes(Charset.forName("UTF-8")));
+        pack.anadirBloque("CipherExam", cipheredBufferDES.getBytes(Charset.forName("UTF-8")));
 
 //Cipher secret key with RSA
         KeyFactory keyFactoryRSA = KeyFactory.getInstance("RSA", "BC");
@@ -61,19 +62,19 @@ public class EmpaquetarExamen {
         File publicKeyFile = new File(args[3] );
         int publicKeyFileLength = (int) publicKeyFile.length();
         byte[] bufferPublic = new byte[privateKeyFileLength];
-        in = new FileInputStream(privateKeyFile);
+        in = new FileInputStream(publicKeyFile);
         in.read(bufferPublic, 0, publicKeyFileLength);
         in.close();
 
-        PKCS8EncodedKeySpec publicKeySpec = new PKCS8EncodedKeySpec(bufferPrivate);
-        PrivateKey publicKey = keyFactoryRSA.generatePrivate(publicKeySpec);
+        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(bufferPrivate);
+        PublicKey publicKey = keyFactoryRSA.generatePublic(publicKeySpec);
 
         Cipher cipherRSA = Cipher.getInstance("RSA", "BC");
         cipherRSA.init(Cipher.ENCRYPT_MODE, publicKey);
 
-        byte[] cipheredDESKey = cipherRSA.doFinal(keyDES.getEncoded());
+        String cipheredDESKey = cipherRSA.doFinal(keyDES.getEncoded()).toString();
 
-        pack.anadirBloque("CipherKey", cipheredDESKey);
+        pack.anadirBloque("CipherKey", cipheredDESKey.getBytes(Charset.forName("UTF-8")));
         String packName = args[1].toString();
         packName += ".paquete";
         PaqueteDAO.escribirPaquete(packName, pack);
