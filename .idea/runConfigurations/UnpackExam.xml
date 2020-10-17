@@ -2,7 +2,7 @@
   <configuration default="false" name="UnpackExam" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="DesempaquetarExamen" />
     <module name="Practice1" />
-    <option name="PROGRAM_PARAMETERS" value="Exam ReceivedExam C:\Users\Djwachu\IdeaProjects\Practice1\Keys\Teacher.privada C:\Users\Djwachu\IdeaProjects\Practice1\Keys\Student.publica" />
+    <option name="PROGRAM_PARAMETERS" value="Exam ReceivedExam Keys\Teacher.privada Keys\Student.publica" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

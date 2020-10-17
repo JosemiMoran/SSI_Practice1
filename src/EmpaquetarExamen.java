@@ -22,65 +22,88 @@ public class EmpaquetarExamen {
         }
 //        Loading security provider ("BC")
         Security.addProvider(new BouncyCastleProvider());
-
+//////////////////////////////// DES PROCESS TO CIPHER STUDENT'S EXAM ////////////////////////////////////////////////////
 //     Generating secret key for DES algorithm. Needed to cipher the Student's exam file
         KeyGenerator DESGenerator = KeyGenerator.getInstance("DES", "BC");
         DESGenerator.init(56);
         SecretKey keyDES = DESGenerator.generateKey();
-
 //      Creating cipher.
         Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
-
-
 // Init cipher to cipher mode
-
         cipher.init(Cipher.ENCRYPT_MODE, keyDES);
-
-
 // Reading Student's exam file
         byte[] buffer = Files.readAllBytes(Paths.get(args[0]));
-
 //Cipher exam.
-        String cipheredBufferDES = cipher.doFinal(buffer).toString();
+        byte[] cipheredBufferDES = cipher.doFinal(buffer);
 
-        pack.anadirBloque("CipherExam", cipheredBufferDES.getBytes(Charset.forName("UTF-8")));
 
+//////////////////////////////// END DES PROCESS TO CIPHER STUDENT'S EXAM ////////////////////////////////////////////////////
+
+
+//////////////////////////////// RSA PROCESS TO CIPHER DES SECRET KEY ////////////////////////////////////////////////////
 //Cipher secret key with RSA
         KeyFactory keyFactoryRSA = KeyFactory.getInstance("RSA", "BC");
-//Getting Student's private key
-        File privateKeyFile = new File(args[2] );
-        int privateKeyFileLength = (int) privateKeyFile.length();
-        byte[] bufferPrivate = new byte[privateKeyFileLength];
-        FileInputStream in = new FileInputStream(privateKeyFile);
-        in.read(bufferPrivate, 0, privateKeyFileLength);
-        in.close();
-
-        PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(bufferPrivate);
-        PrivateKey privateKey = keyFactoryRSA.generatePrivate(privateKeySpec);
-
-        //Getting Teacher's public key
-        File publicKeyFile = new File(args[3] );
-        int publicKeyFileLength = (int) publicKeyFile.length();
-        byte[] bufferPublic = new byte[privateKeyFileLength];
-        in = new FileInputStream(publicKeyFile);
-        in.read(bufferPublic, 0, publicKeyFileLength);
-        in.close();
-
-        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(bufferPrivate);
-        PublicKey publicKey = keyFactoryRSA.generatePublic(publicKeySpec);
-
+        PublicKey teacherPublicKey = getPublicKey(args[3]);
         Cipher cipherRSA = Cipher.getInstance("RSA", "BC");
-        cipherRSA.init(Cipher.ENCRYPT_MODE, publicKey);
+        cipherRSA.init(Cipher.ENCRYPT_MODE, teacherPublicKey);
+        byte[] cipheredDESKey = cipherRSA.doFinal(keyDES.getEncoded());
+//////////////////////////////// END RSA PROCESS TO CIPHER DES SECRET KEY ////////////////////////////////////////////////////
 
-        String cipheredDESKey = cipherRSA.doFinal(keyDES.getEncoded()).toString();
+//////////////////////////////// WRITING PACKAGE ////////////////////////////////////////////////////
 
-        pack.anadirBloque("CipherKey", cipheredDESKey.getBytes(Charset.forName("UTF-8")));
+        pack.anadirBloque("CipherExam", cipheredBufferDES);
+        pack.anadirBloque("SecretKey", cipheredDESKey);
         String packName = args[1].toString();
         packName += ".paquete";
         PaqueteDAO.escribirPaquete(packName, pack);
-
+//////////////////////////////// END WRITING PACKAGE ////////////////////////////////////////////////////
     }
 
+    /**
+     * @param file
+     * @return privateKey
+     * @throws Exception
+     */
+    private static PrivateKey getPrivateKey(String file) throws Exception{
+        PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(readFile(file));
+        KeyFactory keyFactoryRSA = KeyFactory.getInstance("RSA", "BC");
+        PrivateKey privateKey = keyFactoryRSA.generatePrivate(privateKeySpec);
+        return privateKey;
+    }
+
+
+    /**
+     * @param file
+     * @return publicKey
+     * @throws Exception
+     */
+    private static PublicKey getPublicKey(String file) throws Exception{
+        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(readFile(file));
+        KeyFactory keyFactoryRSA = KeyFactory.getInstance("RSA", "BC");
+        PublicKey publicKey = keyFactoryRSA.generatePublic(publicKeySpec);
+        return publicKey;
+    }
+
+
+    /**
+     * @param f
+     * @return fileBuffer
+     * @throws Exception
+     */
+    public static byte[] readFile(String f) throws Exception{
+        File file = new File(f);
+        int fileLength = (int) file.length();
+        byte[] fileBuffer = new byte[fileLength];
+        FileInputStream in = new FileInputStream(file);
+        in.read(fileBuffer, 0, fileLength);
+        in.close();
+
+        return fileBuffer;
+    }
+
+    /**
+     *
+     */
     private static void showTemplateArgs() {
         System.out.println("EmpaquetarExamen");
         System.out.println("\tArgs Syntax: ExamFile PackageName Student.private Teacher.public ");
