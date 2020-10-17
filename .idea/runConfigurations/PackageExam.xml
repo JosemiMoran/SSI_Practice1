@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PackageExam" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="EmpaquetarExamen" />
+    <module name="Practice1" />
+    <option name="PROGRAM_PARAMETERS" value="C:\Users\Djwachu\IdeaProjects\Practice1\InputArgs\Exam.txt Exam C:\Users\Djwachu\IdeaProjects\Practice1\Keys\Student.privada C:\Users\Djwachu\IdeaProjects\Practice1\Keys\Teacher.publica" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
