@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="GenerateTeacherKeys" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="GenerarClaves" />
+    <module name="Practice1" />
+    <option name="PROGRAM_PARAMETERS" value="Teacher" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Keys" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
