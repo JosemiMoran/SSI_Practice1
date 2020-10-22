@@ -19,6 +19,8 @@ import java.util.List;
 
 public class DesempaquetarExamen {
     public static void main(String args[]) throws Exception {
+        KeysOperations keysOperations = new KeysOperations();
+        DecryptMethods decrypt = new DecryptMethods();
         Paquete readPack = PaqueteDAO.leerPaquete(args[0] + ".paquete");
         Security.addProvider(new BouncyCastleProvider());
 
@@ -29,47 +31,25 @@ public class DesempaquetarExamen {
             System.out.println("\t"+block+": "+ blockContent.replace("\n", " "));
         }
 
-        byte[] cipheredSecretKeyBuffer = readPack.getContenidoBloque("SECRETKEY");
+        byte[] cipheredSecretKey = readPack.getContenidoBloque("SECRETKEY");
         byte[] studentExam = readPack.getContenidoBloque("CIPHEREXAM");
 
-        Cipher decipherRSA = Cipher.getInstance("RSA", "BC");
-        PrivateKey teacherPrivateKey = getPrivateKey(args[2]);
-        decipherRSA.init(Cipher.DECRYPT_MODE, teacherPrivateKey);
-        byte[] DESKeyBuffer = decipherRSA.doFinal(cipheredSecretKeyBuffer);
 
-        DESKeySpec DESSpec = new DESKeySpec(DESKeyBuffer);
-        SecretKeyFactory secretKeyFactoryDES = SecretKeyFactory.getInstance("DES");
-        SecretKey DESKey = secretKeyFactoryDES.generateSecret(DESSpec);
 
-        Cipher decipherDES = Cipher.getInstance("DES");
-        decipherDES.init(Cipher.DECRYPT_MODE, DESKey);
-        byte[] decipheredExamBuffer = decipherDES.doFinal(studentExam);
+        PrivateKey teacherPrivateKey = keysOperations.getPrivateKey(args[2]);
+        byte[] cipheredDESKey = decrypt.RSADecrypt(teacherPrivateKey, cipheredSecretKey);
+        SecretKey DESKey = keysOperations.generateSecretKey(cipheredDESKey);
+
+        byte[] receivedExam = decrypt.DESDecrypt(DESKey, studentExam);
 
         FileOutputStream out = new FileOutputStream("receivedExam.txt");
-        out.write(decipheredExamBuffer);
+        out.write(receivedExam);
         out.close();
-        showBytes(decipheredExamBuffer);
+        IOUtilities.showBytes(receivedExam);
         System.out.println();
 
     }
 
-    private static PrivateKey getPrivateKey(String file) throws Exception{
-        PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(EmpaquetarExamen.readFile(file));
-        KeyFactory keyFactoryRSA = KeyFactory.getInstance("RSA", "BC");
-        PrivateKey privateKey = keyFactoryRSA.generatePrivate(privateKeySpec);
-        return privateKey;
-    }
 
-    private static PublicKey getPublicKey(String file) throws Exception{
-        X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(EmpaquetarExamen.readFile(file));
-        KeyFactory keyFactoryRSA = KeyFactory.getInstance("RSA", "BC");
-        PublicKey publicKey = keyFactoryRSA.generatePublic(publicKeySpec);
-        return publicKey;
-    }
-
-    public static void showBytes(byte [] buffer) {
-        System.out.write(buffer, 0, buffer.length);
-        System.out.println("\n-----\n");
-    }
 
 }
