@@ -1,4 +1,9 @@
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -13,7 +18,8 @@ public class Paquete {
     }
 
     public byte[] getContenidoBloque(String nombreBloque) {
-        Bloque bloque = this.bloques.get(nombreBloque);
+        String nombreNormalizado = normalizarNombre(nombreBloque);
+        Bloque bloque = this.bloques.get(nombreNormalizado);
         if (bloque != null) {
             return bloque.contenido;
         } else {

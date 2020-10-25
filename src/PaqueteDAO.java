@@ -1,8 +1,16 @@
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
 
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Base64;
 /**
  *
  * @author ribadas
@@ -99,7 +107,7 @@ public class PaqueteDAO {
             linea = in.readLine();
         }
         if (linea.equals(FIN_PAQUETE)) {
-            return null;  // No hay más bloques
+            return null;  // No hay mÃ¡s bloques
         } else {
             String nombre = extraerNombreBloque(linea);
             byte[] contenido = extraerContenidoBloque(in);
@@ -139,24 +147,24 @@ public class PaqueteDAO {
     /*
      * Ejemplo de uso de las clases Paquete, Bloque y PaqueteDAO
      */
-   /* public static void main(String[] args) {
-        
+    public static void main(String[] args) {
+
         System.out.println("** Se crea un paquete y se escribe en /tmp/paquete1.bin");
 
         Paquete paquete = new Paquete();
         paquete.anadirBloque("parte1", "abcdefg".getBytes(Charset.forName("UTF-8")));
         paquete.anadirBloque("parte2", "abc".getBytes(Charset.forName("UTF-8")));
-        paquete.anadirBloque("parte3 muy larga", "abcdefghijklmnñopqrstuvwxyz1234567890".getBytes(Charset.forName("UTF-8")));
+        paquete.anadirBloque("parte3 muy larga", "abcdefghijklmnÃ±opqrstuvwxyz1234567890".getBytes(Charset.forName("UTF-8")));
 
-	
+
         System.out.println("** Bloques del paquete");
         for (String nombreBloque : paquete.getNombresBloque()) {
-	        byte[] bloque = paquete.getContenidoBloque(nombreBloque);
-            String contenidoBloque = new String(bloque, Charset.forName("UTF-8"));            
+            byte[] bloque = paquete.getContenidoBloque(nombreBloque);
+            String contenidoBloque = new String(bloque, Charset.forName("UTF-8"));
             System.out.println("\t"+nombreBloque+": "+ contenidoBloque.replace("\n", " "));
         }
         System.out.println("");
-        
+
         PaqueteDAO.escribirPaquete("/tmp/paquete1.bin", paquete);
 
         System.out.println("** Se lee el paquete de /tmp/paquete1.bin y se vuelve a escribir en /tmp/paquete2.bin");
@@ -167,5 +175,5 @@ public class PaqueteDAO {
         System.out.println();
 
 
-    }*/
+    }
 }
