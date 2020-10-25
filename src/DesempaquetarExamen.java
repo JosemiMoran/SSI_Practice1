@@ -1,3 +1,4 @@
+import com.sun.xml.internal.bind.v2.TODO;
 import org.bouncycastle.jcajce.provider.symmetric.DES;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jetbrains.annotations.NotNull;
@@ -20,31 +21,33 @@ import java.util.List;
 public class DesempaquetarExamen {
     public static void main(String args[]) throws Exception {
         KeysOperations keysOperations = new KeysOperations();
+        SigningMethods signingMethods = new SigningMethods();
         DecryptMethods decrypt = new DecryptMethods();
         Paquete readPack = PaqueteDAO.leerPaquete(args[0] + ".paquete");
         Security.addProvider(new BouncyCastleProvider());
 
-        ArrayList<byte[]> examBuffer = new ArrayList<>();
-        for (String blockName : readPack.getNombresBloque()) {
-            byte[] block = readPack.getContenidoBloque(blockName);
-            String blockContent = new String(block, Charset.forName("UTF-8"));
-            System.out.println("\t"+block+": "+ blockContent.replace("\n", " "));
-        }
-
         byte[] cipheredSecretKey = readPack.getContenidoBloque("SECRETKEY");
         byte[] studentExam = readPack.getContenidoBloque("CIPHEREXAM");
-
-
+        byte[] studentSign = readPack.getContenidoBloque("STUDENTSIGNATURE");
 
         PrivateKey teacherPrivateKey = keysOperations.getPrivateKey(args[2]);
+        PublicKey studentPublicKey = keysOperations.getPublicKey(args[3]);
+
+        boolean signVerified = signingMethods.verifySignature(studentPublicKey, studentSign );
+        if (signVerified) { // If the signature is correct then decrypt exam
+            //TODO  VERIFY EXAM + VERIFY AUTHORITY
+            System.out.println("Correct signature");
+        }else System.out.println("Incorrect signature");
+
         byte[] cipheredDESKey = decrypt.RSADecrypt(teacherPrivateKey, cipheredSecretKey);
         SecretKey DESKey = keysOperations.generateSecretKey(cipheredDESKey);
-
         byte[] receivedExam = decrypt.DESDecrypt(DESKey, studentExam);
+
 
         FileOutputStream out = new FileOutputStream("receivedExam.txt");
         out.write(receivedExam);
         out.close();
+
         IOUtilities.showBytes(receivedExam);
         System.out.println();
 

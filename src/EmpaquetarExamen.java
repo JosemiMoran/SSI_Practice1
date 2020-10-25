@@ -38,6 +38,7 @@ public class EmpaquetarExamen {
         pack.anadirBloque("CipherExam", cipheredExamDES);
         pack.anadirBloque("SecretKey", cipheredDESKey);
         pack.anadirBloque("StudentSignature", sign);
+
         String packName = args[1].toString();
         packName += ".paquete";
         PaqueteDAO.escribirPaquete(packName, pack);
