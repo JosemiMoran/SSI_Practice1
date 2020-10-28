@@ -32,12 +32,13 @@ public class EmpaquetarExamen {
         toSign.add(cipheredDESKey);
 
         PrivateKey studentPrivateKey = keysOperations.getPrivateKey(args[2]);
-        byte[] sign = signature.generateSignature(studentPrivateKey, toSign);// Generate student's signature.
+        byte[] hash = encrypt.generateHash(toSign) ;
+        byte[] studentSign = encrypt.RSAEncrypting(hash , studentPrivateKey);
 
 
         pack.anadirBloque("CipherExam", cipheredExamDES);
         pack.anadirBloque("SecretKey", cipheredDESKey);
-        pack.anadirBloque("StudentSignature", sign);
+        pack.anadirBloque("StudentSignature", studentSign);
 
         String packName = args[1].toString();
         packName += ".paquete";
