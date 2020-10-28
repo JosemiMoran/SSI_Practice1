@@ -10,7 +10,6 @@ public class EmpaquetarExamen {
     public static void main(@NotNull String args[]) throws Exception {
         Security.addProvider(new BouncyCastleProvider()); //Loading security provider ("BC")
         KeysOperations keysOperations = new KeysOperations();
-        SigningMethods signature = new SigningMethods();
         Paquete pack = new Paquete();
         ArrayList<byte[]> toSign = new ArrayList<>();
 
