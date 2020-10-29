@@ -16,7 +16,7 @@ public class KeysOperations {
      * @return privateKey
      * @throws Exception
      */
-    public PrivateKey getPrivateKey(String file) throws Exception {
+    public static PrivateKey getPrivateKey(String file) throws Exception {
         PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(IOUtilities.readFile(file));
         KeyFactory keyFactoryRSA = KeyFactory.getInstance("RSA", "BC");
         PrivateKey privateKey = keyFactoryRSA.generatePrivate(privateKeySpec);
@@ -29,7 +29,7 @@ public class KeysOperations {
      * @return publicKey
      * @throws Exception
      */
-    public PublicKey getPublicKey(String file) throws Exception {
+    public static PublicKey getPublicKey(String file) throws Exception {
         X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(IOUtilities.readFile(file));
         KeyFactory keyFactoryRSA = KeyFactory.getInstance("RSA", "BC");
         PublicKey publicKey = keyFactoryRSA.generatePublic(publicKeySpec);
@@ -40,7 +40,7 @@ public class KeysOperations {
      * @return SecretKey keyDES
      * @throws Exception
      */
-    public SecretKey generateSecretKeyDES() throws Exception {
+    public static SecretKey generateSecretKeyDES() throws Exception {
         KeyGenerator DESGenerator = KeyGenerator.getInstance("DES", "BC");
         DESGenerator.init(56);
         SecretKey keyDES = DESGenerator.generateKey();
@@ -48,7 +48,7 @@ public class KeysOperations {
         return keyDES;
     }
 
-    public SecretKey generateSecretKey(byte[] secretKey) throws Exception {
+    public static SecretKey generateSecretKey(byte[] secretKey) throws Exception {
         DESKeySpec DESSpec = new DESKeySpec(secretKey);
         SecretKeyFactory secretKeyFactoryDES = SecretKeyFactory.getInstance("DES");
         return secretKeyFactoryDES.generateSecret(DESSpec);

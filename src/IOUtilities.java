@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -28,12 +29,13 @@ public class IOUtilities {
         System.out.write(buffer, 0, buffer.length);
         System.out.println("\n-----\n");
     }
-
-    public static void UnpackExamTests(){
-
+    public static void message(String message){
+        System.out.println(message);
     }
 
-
-
-
+    public static void writeFile(String s, byte[] content) throws Exception {
+        FileOutputStream out = new FileOutputStream(s);
+        out.write(content);
+        out.close();
+    }
 }

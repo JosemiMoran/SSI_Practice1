@@ -1,7 +1,5 @@
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.PrivateKey;
@@ -10,7 +8,7 @@ import java.util.ArrayList;
 
 public class EncryptMethods {
 
-    public byte[] DESEncrypting(String toEncrypt, SecretKey keyDES) throws Exception{
+    public static byte[] DESEncrypting(String toEncrypt, SecretKey keyDES) throws Exception{
         //Creating cipher.
         Cipher cipherDES = Cipher.getInstance("DES/ECB/PKCS5Padding");
         //Init cipher to cipher mode
@@ -18,7 +16,7 @@ public class EncryptMethods {
         //Cipher exam.
         return cipherDES.doFinal(IOUtilities.readFile(toEncrypt));
     }
-    public byte[] RSAEncrypting(byte[] toEncrypt , PublicKey publicKey) throws Exception{
+    public static byte[] RSAEncrypting(byte[] toEncrypt , PublicKey publicKey) throws Exception{
         //Cipher secret key with RSA
         KeyFactory keyFactoryRSA = KeyFactory.getInstance("RSA", "BC");
         //Creating cipher.
@@ -30,7 +28,7 @@ public class EncryptMethods {
         return cipherRSA.doFinal(toEncrypt);
     }
 
-    public byte[] RSAEncrypting(byte[] toEncrypt , PrivateKey privateKey) throws Exception{
+    public static byte[] RSAEncrypting(byte[] toEncrypt , PrivateKey privateKey) throws Exception{
         //Cipher secret key with RSA
         KeyFactory keyFactoryRSA = KeyFactory.getInstance("RSA", "BC");
         //Creating cipher.
@@ -41,7 +39,7 @@ public class EncryptMethods {
         return cipherRSA.doFinal(toEncrypt);
     }
 
-    public byte[] generateHash(ArrayList<byte[]> toHash) throws Exception{
+    public static byte[] generateHash(ArrayList<byte[]> toHash) throws Exception{
         MessageDigest messageDigest = MessageDigest.getInstance("MD5");
         for (byte[] toSignObject : toHash) {
             messageDigest.digest(toSignObject);
